@@ -24,6 +24,7 @@ namespace App.System.Bundles.Editor
 
             if (!File.Exists(bundleManifestPath))
             {
+                Directory.CreateDirectory(Path.GetDirectoryName(bundleManifestPath));
                 File.CreateText(bundleManifestPath);
             }
 

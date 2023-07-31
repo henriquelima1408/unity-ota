@@ -2,18 +2,17 @@
 using UnityEngine;
 using UnityEditor;
 using System.IO;
-using App.Game.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace App.System.Bundles.Editor
+namespace OTA.Editor
 {
     public static class BundleBuilder
     {
         const string fileName = "BundleManifest.txt";
-        const string fileFolderName = "BundleData";        
+        const string fileFolderName = "BundleData";
 
         [MenuItem("Window/Build Bundles")]
         public static void BuildBundles()
@@ -28,7 +27,6 @@ namespace App.System.Bundles.Editor
                 File.CreateText(bundleManifestPath);
             }
 
-
             var assetBundleManifest = BuildPipeline.BuildAssetBundles(Application.streamingAssetsPath, BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
 
             foreach (var assetBundleName in assetBundleManifest.GetAllAssetBundles())
@@ -42,11 +40,12 @@ namespace App.System.Bundles.Editor
                 Debug.Log(ByteToSize(file));
             }
 
-            bundleManifest = new BundleManifest(bundlesMetadataHash.ToArray());
+            //TODO: Get the previous version automatically and increment it during build
+            bundleManifest = new BundleManifest(Application.version, bundlesMetadataHash.ToArray());
 
             using (StreamWriter streamWriter = new StreamWriter(bundleManifestPath))
             {
-                streamWriter.Write(JsonConvert.SerializeObject(bundleManifest));                
+                streamWriter.Write(JsonConvert.SerializeObject(bundleManifest));
             }
 
         }
@@ -60,7 +59,7 @@ namespace App.System.Bundles.Editor
                 var splitElements = assetPaths[i].Split('/');
                 var fileName = splitElements[splitElements.Length - 1];
 
-                result[i] = Path.GetFileNameWithoutExtension(fileName) ;
+                result[i] = Path.GetFileNameWithoutExtension(fileName);
             }
 
             return result;
@@ -83,6 +82,6 @@ namespace App.System.Bundles.Editor
 
             return size;
         }
-    }    
+    }
 }
 #endif

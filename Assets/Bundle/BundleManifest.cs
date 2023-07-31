@@ -1,18 +1,29 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.IO;
 
-namespace App.Game.Services
+namespace OTA
 {
     [Serializable]
     public class BundleManifest
     {
         BundleMetadata[] bundleMetadatas;
+        readonly double version;
 
-        public BundleManifest(BundleMetadata[] bundleMetadatas)
+        public BundleManifest(string version, BundleMetadata[] bundleMetadatas)
         {
             this.bundleMetadatas = bundleMetadatas;
         }
 
         public BundleMetadata[] BundleMetadatas { get => bundleMetadatas; }
+
+        public double Version => version;
+
+        public static BundleManifest FromJson(string json)
+        {
+            return JsonConvert.DeserializeObject<BundleManifest>(json);
+        }
+
     }
 
     [Serializable]

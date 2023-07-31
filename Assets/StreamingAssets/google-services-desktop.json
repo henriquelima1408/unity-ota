@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "634931411183",
+    "project_id": "ota-package-89667",
+    "storage_bucket": "ota-package-89667.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:634931411183:android:ce4521786cb9bb592c031a",
+        "android_client_info": {
+          "package_name": "com.ota.package"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "634931411183-5q83lfcd60h0ja57i8ru5lttnmgj1d74.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBggQw7BqTPZbc9Wm7kRbIZ7XK4HOTcB48"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "634931411183-5q83lfcd60h0ja57i8ru5lttnmgj1d74.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

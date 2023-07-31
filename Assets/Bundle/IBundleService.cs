@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace App.Game.Services
+namespace OTA
 {
     public interface IBundleService
     {

@@ -1,81 +1,44 @@
 ﻿using System;
-using System.IO;
-using UnityEngine;
-using Newtonsoft.Json;
-using System.Collections.Generic;
-using App.System.Bundles.Editor;
+using OTA.BundleProvider;
 
-namespace App.Game.Services
+namespace OTA
 {
     public class BundleService : IBundleService
     {
-        const string fileName = "BundleManifest.txt";
-        const string fileFolderName = "BundleData";
+        readonly IBundleProvider bundleProvider;
 
-        readonly string bundleManifestPath;
-
-        BundleManifest bundleManifest;
-        Dictionary<string, BundleData> bundles = new Dictionary<string, BundleData>();
-
-        public BundleService()
+        public BundleService(IBundleProvider bundleProvider)
         {
-            //TODO: Request manifest for server and create the manifest with response
-
-            bundleManifestPath = Path.Combine(Application.streamingAssetsPath, fileFolderName, $"{fileName}");
-
-            Debug.Assert(File.Exists(bundleManifestPath), $"Bundle manifest doesnt exist in path: {bundleManifestPath}");
-
-            using (StreamReader streamReader = new StreamReader(bundleManifestPath))
-            {
-                var manifestJson = streamReader.ReadToEnd();
-                bundleManifest = JsonConvert.DeserializeObject<BundleManifest>(manifestJson);
-            }
-
-            foreach (var bundleMetadata in bundleManifest.BundleMetadatas)
-            {
-                bundles.Add(bundleMetadata.BundleName, new BundleData(bundleMetadata));
-            }
+            this.bundleProvider = bundleProvider;
         }
 
         public bool IsBundleLoaded(string bundleName)
         {
-            return bundles[bundleName].IsLoaded;
+            return bundleProvider.Bundles[bundleName].IsLoaded;
         }
 
         public string[] GetAssetNames(string bundleName)
         {
-            return bundles[bundleName].GetAssetNames();
-        }
-
-        public void Dispose()
-        {
-            foreach (var bundleName in bundles.Keys)
-            {
-                bundles[bundleName].UnloadBundle();
-            }
-
-            bundles = null;
-            bundleManifest = null;
+            return bundleProvider.Bundles[bundleName].GetAssetNames();
         }
 
         public void LoadAssetAsync<T>(string bundleName, string assetName, Action<T> onAssetLoaded) where T : UnityEngine.Object
         {
-#if UNITY_EDITOR
-            onAssetLoaded?.Invoke(BundleAssetProvider.GetAsset<T>(bundleName, assetName));
-#endif
-
-
-            var bundle = bundles[bundleName];
+            var bundle = bundleProvider.Bundles[bundleName];
 
             LoadBundle(bundleName, (bn) =>
             {
-                onAssetLoaded?.Invoke(bundle.AssetBundle.LoadAsset<T>(assetName));
+#if UNITY_EDITOR
+                onAssetLoaded?.Invoke(BundleProvider.Editor.EditorBundleProvider.GetAsset<T>(bundleName, assetName));
+#else
+onAssetLoaded?.Invoke(bundle.AssetBundle.LoadAsset<T>(assetName));
+#endif
             });
         }
 
         public void LoadBundle(string bundleName, Action<string> onBundleReady)
         {
-            var bundle = bundles[bundleName];
+            var bundle = bundleProvider.Bundles[bundleName];
 
             if (bundle.IsRemote)
             {
@@ -85,7 +48,13 @@ namespace App.Game.Services
                 }
                 else
                 {
-                    //TODO: Request bundle
+                    bundleProvider.RequestBundle(bundle.BundleName, (bundleName) =>
+                    {
+                        if (!bundle.IsLoaded)
+                            bundle.LoadBundle();
+
+                        onBundleReady?.Invoke(bundle.BundleName);
+                    });
                 }
             }
             else
@@ -94,63 +63,6 @@ namespace App.Game.Services
                     bundle.LoadBundle();
 
                 onBundleReady?.Invoke(bundle.BundleName);
-            }
-        }
-
-        [Serializable]
-        class BundleData
-        {
-            readonly string bundleName;
-            readonly string bundlePath;
-            readonly bool isRemote;
-            readonly BundleMetadata bundleMetadata;
-
-            AssetBundle assetBundle;
-
-            public string BundleName { get => bundleName; }
-            public bool IsRemote { get => isRemote; }
-            public bool IsLoaded
-            {
-                get
-                {
-
-#if UNITY_EDITOR
-                    return true;
-#else
-                    return assetBundle != null;
-#endif
-                }
-            }
-            public AssetBundle AssetBundle { get => assetBundle; }
-
-            public BundleData(BundleMetadata bundleMetadata)
-            {
-                this.bundleMetadata = bundleMetadata;
-                this.bundleName = bundleMetadata.BundleName;
-                this.isRemote = bundleMetadata.IsRemote;
-                this.bundlePath = Path.Combine(Application.streamingAssetsPath, bundleName);
-            }
-
-            public void LoadBundle()
-            {
-                if (!IsLoaded)
-                    assetBundle = AssetBundle.LoadFromFile(bundlePath);
-            }
-
-            public void UnloadBundle()
-            {
-                if (IsLoaded)
-                    assetBundle = null;
-            }
-
-            public string[] GetDependencies()
-            {
-                return bundleMetadata.Dependecies;
-            }
-
-            public string[] GetAssetNames()
-            {
-                return bundleMetadata.Assets;
             }
         }
 

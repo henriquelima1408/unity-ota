@@ -1,6 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 namespace OTA
 {
@@ -57,5 +59,29 @@ namespace OTA
         public double Size => size;
 
         public bool IsRemote => isRemote;
+
+        public override string ToString()
+        {
+            var stringBuilder = new StringBuilder();
+            stringBuilder.Append($"BundleName: {BundleName}\n");
+
+            stringBuilder.Append($"Dependecy: ");
+            foreach (var depency in Dependecies)
+            {
+                stringBuilder.Append($"{depency}\n");
+            }
+
+            stringBuilder.Append($"Assets: ");
+            foreach (var depency in Assets)
+            {
+                stringBuilder.Append($"{depency}\n");
+            }
+
+            stringBuilder.Append($"Version: {version}\n");
+            stringBuilder.Append($"Size: {size}\n");
+            stringBuilder.Append($"IsRemote: {size}\n");
+
+            return stringBuilder.ToString();
+        }
     }
 }

@@ -1,1 +1,1 @@
-{"BundleMetadatas":[{"BundleName":"asset-example","Dependecies":[],"Assets":["23771716"],"Version":1.0,"Size":0.57446000000000008,"IsRemote":false}]}
+{"BundleMetadatas":[{"BundleName":"asset-example","Dependecies":[],"Assets":["23771716"],"Version":1.0,"Size":0.57446000000000008,"IsRemote":false}],"Version":0.0}

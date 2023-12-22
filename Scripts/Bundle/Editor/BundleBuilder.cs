@@ -19,6 +19,11 @@ namespace OTA.Editor
         {
             DeleteDirectoryContents(Application.streamingAssetsPath);
 
+            if (!Directory.Exists(Application.streamingAssetsPath))
+            {
+                Directory.CreateDirectory(Application.streamingAssetsPath);
+            }
+
             var manifest = BuildPipeline.BuildAssetBundles(Application.streamingAssetsPath, BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
             var bundleManifestPath = Path.Combine(Application.streamingAssetsPath, fileFolderName, $"{fileName}");
 
@@ -34,7 +39,6 @@ namespace OTA.Editor
                 var bundleMetadata = new BundleMetadata(assetBundleName, dependencies, assetNames, GetAssetVersion(assetBundleName), ByteToSize(file), IsAssetRemote(assetBundleName));
 
                 bundlesMetadataHash.Add(bundleMetadata);
-                Debug.Log(bundleMetadata.ToString());
             }
 
             //TODO: Get the previous version automatically and increment it during build
@@ -43,7 +47,19 @@ namespace OTA.Editor
             Directory.CreateDirectory(Path.GetDirectoryName(bundleManifestPath));
             using (StreamWriter streamWriter = new StreamWriter(bundleManifestPath))
             {
-                streamWriter.Write(JsonConvert.SerializeObject(bundleManifest));
+                streamWriter.Write(JsonPrettify(JsonConvert.SerializeObject(bundleManifest)));
+            }
+        }
+
+        static string JsonPrettify(string json)
+        {
+            using (var stringReader = new StringReader(json))
+            using (var stringWriter = new StringWriter())
+            {
+                var jsonReader = new JsonTextReader(stringReader);
+                var jsonWriter = new JsonTextWriter(stringWriter) { Formatting = Formatting.Indented };
+                jsonWriter.WriteToken(jsonReader);
+                return stringWriter.ToString();
             }
         }
 
@@ -59,14 +75,17 @@ namespace OTA.Editor
 
         static void DeleteDirectoryContents(string directoryPath)
         {
-            foreach (var file in Directory.GetFiles(directoryPath))
+            if (Directory.Exists(directoryPath))
             {
-                File.Delete(file);
-            }
+                foreach (var file in Directory.GetFiles(directoryPath))
+                {
+                    File.Delete(file);
+                }
 
-            foreach (var subdirectory in Directory.GetDirectories(directoryPath))
-            {
-                DeleteDirectory(subdirectory);
+                foreach (var subdirectory in Directory.GetDirectories(directoryPath))
+                {
+                    DeleteDirectory(subdirectory);
+                }
             }
 
             static void DeleteDirectory(string targetDirectory)

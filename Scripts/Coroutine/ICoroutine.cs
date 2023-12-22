@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections;
 
-namespace App.Game.Services
+namespace OTA.Coroutine
 {
-    public interface ICoroutineService
+    public interface ICoroutine
     {
         void RunCoroutine(IEnumerator enumerator, Action onCoroutineComplete);
-        void RemoveCoroutine(string coroutineID);
     }
 }

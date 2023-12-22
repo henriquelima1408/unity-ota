@@ -2,7 +2,8 @@
 
 namespace OTA
 {
-    public interface IBundleService
+
+    public interface IBundleController
     {
         void LoadAssetAsync<T>(string bundleName, string assetName, Action<T> onAssetLoaded) where T : UnityEngine.Object;
         void LoadBundle(string bundleName, Action<string> onBundleLoaded);

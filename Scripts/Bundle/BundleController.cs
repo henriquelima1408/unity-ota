@@ -3,11 +3,11 @@ using OTA.BundleProvider;
 
 namespace OTA
 {
-    public class BundleService : IBundleService
+    public class BundleController : IBundleController
     {
         readonly IBundleProvider bundleProvider;
 
-        public BundleService(IBundleProvider bundleProvider)
+        public BundleController(IBundleProvider bundleProvider)
         {
             this.bundleProvider = bundleProvider;
         }

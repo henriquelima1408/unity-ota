@@ -3,10 +3,10 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections.Generic;
-using App.Game.Services;
 using System.Collections;
 using System.Linq;
 using OTA.Downloader;
+using OTA.Coroutine;
 
 namespace OTA.BundleProvider
 {
@@ -16,7 +16,7 @@ namespace OTA.BundleProvider
 
         readonly string appVersion;
         readonly string bundleManifestLocalFilePath;
-        readonly ICoroutineService coroutineService;
+        readonly ICoroutine coroutine;
         readonly IDownloader downloader;
 
         BundleManifest bundleManifest;
@@ -24,15 +24,15 @@ namespace OTA.BundleProvider
 
         public IReadOnlyDictionary<string, BundleData> Bundles => bundles;
 
-        public BundleProvider(ICoroutineService coroutineService, IDownloader downloader)
+        public BundleProvider(ICoroutine coroutine, IDownloader downloader, Action onManifestReady)
         {
             this.downloader = downloader;
-            this.coroutineService = coroutineService;
+            this.coroutine = coroutine;
 
             appVersion = Application.version;
             bundleManifestLocalFilePath = Path.Combine(Application.streamingAssetsPath, "BundleData", "BundleManifest.txt");
 
-            coroutineService.RunCoroutine(LoadManifestFromLocalCache(), null);
+            coroutine.RunCoroutine(LoadManifestFromLocalCache(), onManifestReady);
         }
 
         IEnumerator LoadManifestFromLocalCache()
@@ -61,7 +61,7 @@ namespace OTA.BundleProvider
         {
             var requestPath = Path.Combine(BundleData.BundlesFolderLocalPath, bundleName);
 
-            coroutineService.RunCoroutine(LoadBundleFromLocalCache(requestPath, (fileExist) =>
+            coroutine.RunCoroutine(LoadBundleFromLocalCache(requestPath, (fileExist) =>
             {
                 if (fileExist)
                 {
@@ -92,7 +92,7 @@ namespace OTA.BundleProvider
             var newBundles = new Dictionary<string, BundleData>();
             foreach (var bundleMetadata in bundleManifest.BundleMetadatas)
             {
-                bundles.Add(bundleMetadata.BundleName, new BundleData(bundleMetadata));
+                newBundles.Add(bundleMetadata.BundleName, new BundleData(bundleMetadata));
             }
 
             if (this.bundleManifest != null)

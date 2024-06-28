@@ -12,7 +12,6 @@ namespace OTA.Editor
     public static class BundleBuilder
     {
         const string fileName = "BundleManifest.txt";
-        const string fileFolderName = "BundleData";
 
         [MenuItem("Window/Build Bundles")]
         public static void BuildBundles()
@@ -25,7 +24,7 @@ namespace OTA.Editor
             }
 
             var manifest = BuildPipeline.BuildAssetBundles(Application.streamingAssetsPath, BuildAssetBundleOptions.ChunkBasedCompression, EditorUserBuildSettings.activeBuildTarget);
-            var bundleManifestPath = Path.Combine(Application.streamingAssetsPath, fileFolderName, $"{fileName}");
+            var bundleManifestPath = Path.Combine(Application.streamingAssetsPath, $"{fileName}");
 
             BundleManifest bundleManifest;
             var bundlesMetadataHash = new HashSet<BundleMetadata>();
@@ -48,7 +47,6 @@ namespace OTA.Editor
             //TODO: Get the previous version automatically and increment it during build
             bundleManifest = new BundleManifest(Application.version, bundlesMetadataHash.ToArray());
 
-            Directory.CreateDirectory(Path.GetDirectoryName(bundleManifestPath));
             using (StreamWriter streamWriter = new StreamWriter(bundleManifestPath))
             {
                 streamWriter.Write(JsonPrettify(JsonConvert.SerializeObject(bundleManifest)));

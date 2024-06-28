@@ -34,17 +34,18 @@ namespace OTA
         readonly string bundleName;
         readonly string[] dependecies;
         readonly string[] assets;
+        readonly string crc;
         readonly double version;
-        readonly double size;
+            
         readonly bool isRemote;
 
-        public BundleMetadata(string bundleName, string[] dependecies, string[] assets, double version, double size, bool isRemote)
+        public BundleMetadata(string bundleName, string[] dependecies, string[] assets, double version, string crc, bool isRemote)
         {
             this.bundleName = bundleName;
             this.dependecies = dependecies;
             this.assets = assets;
+            this.crc = crc;
             this.version = version;
-            this.size = size;
             this.isRemote = isRemote;
         }
 
@@ -56,7 +57,7 @@ namespace OTA
 
         public double Version => version;
 
-        public double Size => size;
+        public string CRC => crc;
 
         public bool IsRemote => isRemote;
 
@@ -78,8 +79,8 @@ namespace OTA
             }
 
             stringBuilder.Append($"Version: {version}\n");
-            stringBuilder.Append($"Size: {size}\n");
-            stringBuilder.Append($"IsRemote: {size}\n");
+            stringBuilder.Append($"CRC: {crc}\n");
+            stringBuilder.Append($"IsRemote: {isRemote}\n");
 
             return stringBuilder.ToString();
         }

@@ -32,11 +32,15 @@ namespace OTA.Editor
 
             foreach (var assetBundleName in manifest.GetAllAssetBundles())
             {
+                uint crc = 0;
                 var dependencies = AssetDatabase.GetAssetBundleDependencies(assetBundleName, true);
                 var assetNames = ConvertPathsToAssetName(AssetDatabase.GetAssetPathsFromAssetBundle(assetBundleName));
-                var assetBundlePath = Path.Combine(Application.streamingAssetsPath, assetBundleName);
+
+                var assetBundlePath = Path.Combine(Application.streamingAssetsPath, assetBundleName);                
+                BuildPipeline.GetCRCForAssetBundle(assetBundlePath, out crc);
+                
                 var file = File.ReadAllBytes(assetBundlePath);
-                var bundleMetadata = new BundleMetadata(assetBundleName, dependencies, assetNames, GetAssetVersion(assetBundleName), ByteToSize(file), IsAssetRemote(assetBundleName));
+                var bundleMetadata = new BundleMetadata(assetBundleName, dependencies, assetNames, GetAssetVersion(assetBundleName), crc.ToString(), IsAssetRemote(assetBundleName));
 
                 bundlesMetadataHash.Add(bundleMetadata);
             }

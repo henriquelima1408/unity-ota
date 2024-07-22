@@ -30,13 +30,19 @@ namespace OTA.BundleProvider
             this.coroutine = coroutine;
 
             appVersion = Application.version;
-            bundleManifestLocalFilePath = Path.Combine(Application.streamingAssetsPath, "BundleData", "BundleManifest.txt");
+
+            #if UNITY_EDITOR_LINUX
+                bundleManifestLocalFilePath = "file://";
+            #endif
+            
+            bundleManifestLocalFilePath += Path.Combine(Application.streamingAssetsPath, "BundleManifest.txt");
 
             coroutine.RunCoroutine(LoadManifestFromLocalCache(), onManifestReady);
         }
 
         IEnumerator LoadManifestFromLocalCache()
         {
+            
             var unityWebRequest = UnityWebRequest.Get(bundleManifestLocalFilePath);
             yield return unityWebRequest.SendWebRequest();
 
@@ -109,7 +115,7 @@ namespace OTA.BundleProvider
                             bundle.UnloadBundle();
                         }
 
-                        // if bundle version is different or it doesn´t exist in the new bundleManifest, delete it
+                        // if bundle version is different or it doesnï¿½t exist in the new bundleManifest, delete it
                         if (newBundles.ContainsKey(bundle.BundleName))
                         {
                             if (bundle.BundleMetadata.Version != newBundles[bundle.BundleName].BundleMetadata.Version)
